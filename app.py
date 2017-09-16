@@ -6,7 +6,7 @@ from os.path import join, dirname
 from os import environ
 from watson_developer_cloud import VisualRecognitionV3
 
-def func(language, cutoff_score, entries_to_keep, imageUrl):
+def translator(language, cutoff_score, entries_to_keep, imageUrl):
 
     # Define packages
     translator = Translator()
