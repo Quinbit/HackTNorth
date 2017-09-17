@@ -21,7 +21,8 @@ from watson_developer_cloud import *
 import os
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import SocketServer
-    
+import time
+
 def process_request(lang, imageUrlNS):
     cutoff_score = 0.6
     entries_to_keep = 3
@@ -30,17 +31,17 @@ def process_request(lang, imageUrlNS):
     # Define packages
     translator = Translator()
     visual_recognition = VisualRecognitionV3('2016-05-20', api_key='9a7a0b69bd17b6170aea8d075a67a431b1890107')
-    
+    print("Getting response")
     # Raw response data as string
-    response = json.dumps(visual_recognition.classify(images_url="http://165.227.46.196"), indent=2)
-    
+    response = json.dumps(visual_recognition.classify(images_url="http://165.227.46.196:500"), indent=2)
+    print(response)
     # Stripped response data with classes
     array = ast.literal_eval(response).get('images', 0)[0].get('classifiers', 1)[0].get('classes', 2)
     
     # Classes ordered by score (highest first)
     ordered = sorted(array, key=itemgetter('score'), reverse = True)
     # Only keep classes with scores higher than cutoff_scor
-    filtered = [it for it in ordered if it['score'] > cutof_score]
+    filtered = [it for it in ordered if it['score'] > cutoff_score]
     
     # Only keep top entries_to_keep entries
     top = filtered[:entries_to_keep]
@@ -55,6 +56,10 @@ def process_request(lang, imageUrlNS):
     return [[str(i.text), str(i.pronunciation)] for i in translated]
 
 class S(BaseHTTPRequestHandler):
+    path_to_image = "imageToSave.png"
+    statinfo = os.stat(path_to_image)
+    img_size = statinfo.st_size
+    
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -62,10 +67,10 @@ class S(BaseHTTPRequestHandler):
     
     def do_GET(self):
         self.send_response(200)
-        self.send_header("Content-type", "image/jpg")
-        self.send_header("Content-length", img_size)
+        self.send_header("Content-type", "image/png")
+        self.send_header("Content-length", self.img_size)
         self.end_headers()
-        f = open(path_to_image, 'rb')
+        f = open(self.path_to_image, 'rb')
         self.wfile.write(f.read())
         f.close()    
     def do_HEAD(self):
@@ -75,7 +80,7 @@ class S(BaseHTTPRequestHandler):
         # Doesn't do anything with posted data
         content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
         post_data = self.rfile.read(content_length) # <--- Gets the data itself
-        print(post_data)
+        # print(post_data)
         
         #self._set_headers()
         #self.wfile.write("<html><body><h1>POST!</h1></body></html>")
@@ -85,20 +90,16 @@ class S(BaseHTTPRequestHandler):
             fh = open("imageToSave.png", "w")
             fh.write(post_data.decode('base64'))
             fh.close()
-            results = process_request('en', "imageToSave.png")
-
-            return_string = ""
-
-            for i in range(len(results)):
-                return_string = return_string + "___" + str(results[i]).replace("]","").replace("[","")
+            print("file created")
         except Exception as e:
             return_string = "en___0"
             print(e)
-        
+        print("Got this far")
         self.send_response(200)  # OK
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write(return_string)
+        print("Beginning to send return file")
+        self.wfile.write("Done")
 
 
 

@@ -21,7 +21,8 @@ from watson_developer_cloud import *
 import os
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import SocketServer
-    
+import time
+
 def process_request(lang, imageUrlNS):
     cutoff_score = 0.6
     entries_to_keep = 3
@@ -30,9 +31,9 @@ def process_request(lang, imageUrlNS):
     # Define packages
     translator = Translator()
     visual_recognition = VisualRecognitionV3('2016-05-20', api_key='9a7a0b69bd17b6170aea8d075a67a431b1890107')
-    
+    print("Getting response")
     # Raw response data as string
-    response = json.dumps(visual_recognition.classify(images_url="http://165.227.46.196"), indent=2)
+    response = json.dumps(visual_recognition.classify(images_url="http://165.227.46.196:500"), indent=2)
     print(response)
     # Stripped response data with classes
     array = ast.literal_eval(response).get('images', 0)[0].get('classifiers', 1)[0].get('classes', 2)
@@ -74,12 +75,12 @@ class S(BaseHTTPRequestHandler):
         f.close()    
     def do_HEAD(self):
         self._set_headers()
-    
+    '''
     def do_POST(self):
         # Doesn't do anything with posted data
         content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
         post_data = self.rfile.read(content_length) # <--- Gets the data itself
-        print(post_data)
+        # print(post_data)
         
         #self._set_headers()
         #self.wfile.write("<html><body><h1>POST!</h1></body></html>")
@@ -89,21 +90,27 @@ class S(BaseHTTPRequestHandler):
             fh = open("imageToSave.png", "w")
             fh.write(post_data.decode('base64'))
             fh.close()
+            print("file created")
             results = process_request('en', "imageToSave.png")
-
+            #time.sleep(30)
+            #results = [['test', 'test'], ['test1', 'test1']]
+            print(results)
             return_string = ""
 
+            print("started loop")
             for i in range(len(results)):
                 return_string = return_string + "___" + str(results[i]).replace("]","").replace("[","")
+            print("Finishes loop")
         except Exception as e:
             return_string = "en___0"
             print(e)
-        
+        print("Got this far")
         self.send_response(200)  # OK
         self.send_header('Content-type', 'text/html')
         self.end_headers()
+        print("Beginning to send return file")
         self.wfile.write(return_string)
-
+    '''
 
 
 def run(server_class=HTTPServer, handler_class=S, port=80):
@@ -118,4 +125,4 @@ if __name__ == "__main__":
     if len(argv) == 2:
         run(port=int(argv[1]))
     else:
-        run()
+        run(port=500)
