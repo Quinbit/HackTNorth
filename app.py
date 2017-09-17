@@ -18,7 +18,7 @@ from operator import itemgetter
 from os.path import join, dirname
 from os import environ
 from watson_developer_cloud import *
-
+import os
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import SocketServer
     
@@ -32,7 +32,7 @@ def process_request(lang, imageUrlNS):
     visual_recognition = VisualRecognitionV3('2016-05-20', api_key='9a7a0b69bd17b6170aea8d075a67a431b1890107')
     
     # Raw response data as string
-    response = json.dumps(visual_recognition.classify(images_url=imageUrl), indent=2)
+    response = json.dumps(visual_recognition.classify(images_url="http://165.227.46.196"), indent=2)
     
     # Stripped response data with classes
     array = ast.literal_eval(response).get('images', 0)[0].get('classifiers', 1)[0].get('classes', 2)
@@ -62,7 +62,15 @@ class S(BaseHTTPRequestHandler):
     
     def do_GET(self):
         self._set_headers()
-        self.wfile.write("<html><body><h1>hi!</h1></body></html>")
+        f=open("imageToSave.png", 'rb')
+        self.send_response(200)
+        self.send_header('Content-type',        'image/png')
+        statinfo = os.stat('imageToSave.png')
+        img_size = statinfo.st_size
+        self.send_header("Content-length", img_size)
+        self.end_headers()
+        self.wfile.write(f.read())
+        f.close()
     
     def do_HEAD(self):
         self._set_headers()
@@ -76,16 +84,20 @@ class S(BaseHTTPRequestHandler):
         #self._set_headers()
         #self.wfile.write("<html><body><h1>POST!</h1></body></html>")
 
-        vals = post_data.split("_")
+        #vals = post_data.split("_")
         try:
-            results = process_request(vals[0], vals[1])
+            fh = open("imageToSave.png", "w")
+            fh.write(post_data.decode('base64'))
+            fh.close()
+            results = process_request('en', "imageToSave.png")
 
             return_string = ""
 
             for i in range(len(results)):
                 return_string = return_string + "___" + str(results[i]).replace("]","").replace("[","")
-        except:
+        except Exception as e:
             return_string = "en___0"
+            print(e)
         
         self.send_response(200)  # OK
         self.send_header('Content-type', 'text/html')
