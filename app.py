@@ -33,14 +33,14 @@ def process_request(lang, imageUrlNS):
     
     # Raw response data as string
     response = json.dumps(visual_recognition.classify(images_url="http://165.227.46.196"), indent=2)
-    
+    print(response)
     # Stripped response data with classes
     array = ast.literal_eval(response).get('images', 0)[0].get('classifiers', 1)[0].get('classes', 2)
     
     # Classes ordered by score (highest first)
     ordered = sorted(array, key=itemgetter('score'), reverse = True)
     # Only keep classes with scores higher than cutoff_scor
-    filtered = [it for it in ordered if it['score'] > cutof_score]
+    filtered = [it for it in ordered if it['score'] > cutoff_score]
     
     # Only keep top entries_to_keep entries
     top = filtered[:entries_to_keep]
@@ -55,20 +55,21 @@ def process_request(lang, imageUrlNS):
     return [[str(i.text), str(i.pronunciation)] for i in translated]
 
 class S(BaseHTTPRequestHandler):
+    path_to_image = "imageToSave.png"
+    statinfo = os.stat(path_to_image)
+    img_size = statinfo.st_size
+    
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
     
     def do_GET(self):
-        path_to_image = "imageToSave.png"
-        statinfo = os.stat(path_to_image)
-        img_size = statinfo.st_size
         self.send_response(200)
-        self.send_header("Content-type", "image/jpg")
-        self.send_header("Content-length", img_size)
+        self.send_header("Content-type", "image/png")
+        self.send_header("Content-length", self.img_size)
         self.end_headers()
-        f = open(path_to_image, 'rb')
+        f = open(self.path_to_image, 'rb')
         self.wfile.write(f.read())
         f.close()    
     def do_HEAD(self):
