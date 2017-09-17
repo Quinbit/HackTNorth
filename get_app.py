@@ -27,6 +27,7 @@ def process_request(lang, imageUrlNS):
     cutoff_score = 0.6
     entries_to_keep = 3
     language = str(lang)
+    print(lang)
     imageUrl = str(imageUrlNS)
     # Define packages
     translator = Translator()
@@ -48,12 +49,15 @@ def process_request(lang, imageUrlNS):
     
     # List of all expressions in English
     eng = [expression['class'] for expression in top]
-    
+    print(language)
     # List of all translated objects
     translated = translator.translate(eng, dest=language)
-    
+    print(translated)
     # return translated text + pronunciation for all relevant entries
-    return [[str(i.text), str(i.pronunciation)] for i in translated]
+    a = []
+    for i in translated:
+        a.append([str(i.text), str(i.pronunciation)])
+    return a
 
 class S(BaseHTTPRequestHandler):
     path_to_image = "imageToSave.png"
@@ -85,13 +89,13 @@ class S(BaseHTTPRequestHandler):
         #self._set_headers()
         #self.wfile.write("<html><body><h1>POST!</h1></body></html>")
 
-        #vals = post_data.split("_")
+        vals = post_data.split("***")
         try:
             fh = open("imageToSave.png", "w")
             fh.write(post_data.decode('base64'))
             fh.close()
             print("file created")
-            results = process_request('en', "imageToSave.png")
+            results = process_request(vals[1], "imageToSave.png")
             #time.sleep(30)
             #results = [['test', 'test'], ['test1', 'test1']]
             print(results)
