@@ -42,7 +42,7 @@ int curr_row = 1;
     self.PronunLabel1.hidden = true;
     self.PronunLabel2.hidden = true;
     self.PronunLabel3.hidden = true;
-    _pickerData = @[@"English", @"French", @"Korean", @"Russian", @"German", @"Japanese"];
+    _pickerData = @[@"English", @"French", @"Italian", @"Swedish", @"Spanish", @"Estonian"];
     
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         
@@ -114,24 +114,24 @@ int curr_row = 1;
     
     NSString *des_lan = @"en";
     
-    if (curr_row == 2) {
+    if (curr_row == 1) {
         des_lan = @"fr";
     }
+    else if (curr_row == 2) {
+        des_lan = @"it";
+    }
     else if (curr_row == 3) {
-        des_lan = @"kr";
+        des_lan = @"sv";
     }
     else if (curr_row == 4) {
-        des_lan = @"ru";
+        des_lan = @"es";
     }
     else if (curr_row == 5) {
-        des_lan = @"gr";
-    }
-    else if (curr_row == 6) {
-        des_lan = @"jp";
+        des_lan = @"et";
     }
     
-    //NSString *resultString = [NSString stringWithFormat:@"%@/%@/%@", des_lan, @"_", base64];
-    NSString *resultString = base64;
+    NSString *resultString = [NSString stringWithFormat:@"%@***%@", base64, des_lan];
+    //NSString *resultString = base64;
     
     
     
