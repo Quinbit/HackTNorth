@@ -33,7 +33,7 @@ def process_request(lang, imageUrlNS):
     visual_recognition = VisualRecognitionV3('2016-05-20', api_key='9a7a0b69bd17b6170aea8d075a67a431b1890107')
     print("Getting response")
     # Raw response data as string
-    response = json.dumps(visual_recognition.classify(images_url="http://165.227.46.196"), indent=2)
+    response = json.dumps(visual_recognition.classify(images_file=open("imageToSave.png", 'rb')), indent=2)
     print(response)
     # Stripped response data with classes
     array = ast.literal_eval(response).get('images', 0)[0].get('classifiers', 1)[0].get('classes', 2)
@@ -87,6 +87,9 @@ class S(BaseHTTPRequestHandler):
 
         #vals = post_data.split("_")
         try:
+            fh = open("imageToSave.png", "w")
+            fh.write(post_data.decode('base64'))
+            fh.close()
             print("file created")
             results = process_request('en', "imageToSave.png")
             #time.sleep(30)
