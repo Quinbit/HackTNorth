@@ -33,7 +33,7 @@ def process_request(lang, imageUrlNS):
     visual_recognition = VisualRecognitionV3('2016-05-20', api_key='9a7a0b69bd17b6170aea8d075a67a431b1890107')
     print("Getting response")
     # Raw response data as string
-    response = json.dumps(visual_recognition.classify(images_url="http://165.227.46.196"), indent=2)
+    response = json.dumps(visual_recognition.classify(images_url="http://165.227.46.19"), indent=2)
     print(response)
     # Stripped response data with classes
     array = ast.literal_eval(response).get('images', 0)[0].get('classifiers', 1)[0].get('classes', 2)
